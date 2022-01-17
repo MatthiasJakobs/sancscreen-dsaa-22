@@ -47,28 +47,7 @@ def spearman_footrule(a, b, normalize=True):
 
     return np.sum(np.abs(a - b), axis=1) / upper_bound
 
-def _average_value(n, k=0):
-    return (n-1)/2 + k
-
 def generate_mean_ranking(e):
-    # if len(e.shape) == 1:
-    #     e = e.reshape(1, -1)
-    # mean_rank = rank(e)
-    # for i, v in enumerate([-3, -2, -1, 0, 1, 2, 3]):
-    #     inds_r, inds_c = np.where(e == v)
-    #     if len(inds_r) == 0:
-    #         continue
-
-    #     pairs = np.vstack([inds_r, inds_c]).T
-    #     for j in np.unique(inds_r):
-    #         relevant_pairs = pairs[np.where(pairs[:, 0] == j)][:, 1]
-    #         n = len(relevant_pairs)
-
-    #         if n > 1:
-    #             av = _average_value(n, k=np.min(mean_rank[j, relevant_pairs]))
-    #             mean_rank[j, relevant_pairs] = np.mean(mean_rank[j, relevant_pairs])
-
-    #return mean_rank
     if len(e.shape) == 2 and e.shape[0] != 1:
         return rankdata(e, axis=1)
     return rankdata(e)
@@ -79,13 +58,13 @@ def assert_size_match(e0, e1):
 def scosine(e0, e1):
     assert_size_match(e0, e1)
     if len(e0.shape) == 2 and e0.shape[0] != 1:
-        return [distance.cosine(a.flatten(), b.flatten())/2 for a, b in zip(e0, e1)]
+        return np.array([distance.cosine(a.flatten(), b.flatten())/2 for a, b in zip(e0, e1)])
     return distance.cosine(e0.flatten(), e1.flatten())/2
 
 def seuclidean(e0, e1):
     assert_size_match(e0, e1)
     if len(e0.shape) == 2 and e0.shape[0] != 1:
-        return [distance.euclidean(a.flatten(), b.flatten()) for a, b in zip(e0, e1)]
+        return np.array([distance.euclidean(a.flatten(), b.flatten()) for a, b in zip(e0, e1)])
     return distance.euclidean(e0.flatten(), e1.flatten())/2
 
 def shamming(e0, e1, threshold=1e-8):
@@ -97,11 +76,14 @@ def shamming(e0, e1, threshold=1e-8):
         neg = distance.hamming(
                 e0.flatten() < -threshold,
                 e1.flatten() < -threshold)
-        return (pos+neg)/2
+        zeros = distance.hamming(
+                np.abs(e0.flatten()) <= threshold,
+                np.abs(e1.flatten()) <= threshold)
+        return (pos+neg+zeros)/3
     """
         Gives the proportional match between feature importances that
         are above or below a given threshold, normalized to [0, 1].
     """
     assert_size_match(e0, e1)
     if len(e0.shape) == 2 and e0.shape[0] != 1:
-        return [_hamming(a, b) for a, b in zip(e0, e1)]
+        return np.array([_hamming(a, b) for a, b in zip(e0, e1)])

@@ -2,18 +2,12 @@
 
 import numpy as np
 
-from metrics import generate_mean_ranking, spearman_footrule
+from metrics import generate_mean_ranking, spearman_footrule, shamming, scosine
 from datasets import load_sancscreen
 from parameters import sancscreen_config
 from scipy.stats import wilcoxon
 
 from exp2 import run_random_forest, run_neural_network
-
-
-def spearman(attr, gt_attributions):
-    _m_attr = generate_mean_ranking(attr)
-    _m_gt = generate_mean_ranking(gt_attributions)
-    return spearman_footrule(_m_attr, _m_gt)
 
 if __name__ == "__main__":
     # Load pretrained model, dataset and configs
@@ -40,47 +34,51 @@ if __name__ == "__main__":
     rf_labels, rf_attributions = run_random_forest(X_train, y_train, X_test, y_test, X, y, gt_attributions, feature_names)
     nn_labels, nn_attributions = run_neural_network(X_train, y_train, X_test, y_test, X, y, gt_attributions, feature_names, c)
 
-    print("RF")
-    i = 0
-    while i < len(rf_labels):
-        j = i+1
-        while j < len(rf_labels):
-            a_label = rf_labels[i]
-            b_label = rf_labels[j]
-            a_attr = rf_attributions[i]
-            b_attr = rf_attributions[j]
+    for (distance_name, distance_fn) in zip(["Spearman", "Cosine", "Hamming"], [spearman_footrule, scosine, shamming]):
 
-            footrules_a = spearman(a_attr, gt_attributions)
-            footrules_b = spearman(b_attr, gt_attributions)
-            footrules = footrules_a - footrules_b
+        print(distance_name)
 
-            w, p = wilcoxon(footrules)
-            if p >= 0.01:
-                print("Not significant", a_label, b_label, w, p)
+        print("RF")
+        i = 0
+        while i < len(rf_labels):
+            j = i+1
+            while j < len(rf_labels):
+                a_label = rf_labels[i]
+                b_label = rf_labels[j]
+                a_attr = rf_attributions[i]
+                b_attr = rf_attributions[j]
 
-            j += 1
-        i += 1
+                a = distance_fn(a_attr, gt_attributions)
+                b = distance_fn(b_attr, gt_attributions)
+                footrules = a - b
 
-    print()
+                w, p = wilcoxon(footrules)
+                if p >= 0.01:
+                    print("Not significant", a_label, b_label, w, p)
 
-    print("NN")
-    i = 0
-    while i < len(nn_labels):
-        j = i+1
-        while j < len(nn_labels):
-            a_label = nn_labels[i]
-            b_label = nn_labels[j]
-            a_attr = nn_attributions[i]
-            b_attr = nn_attributions[j]
+                j += 1
+            i += 1
 
-            footrules_a = spearman(a_attr, gt_attributions)
-            footrules_b = spearman(b_attr, gt_attributions)
-            footrules = footrules_a - footrules_b
+        print("NN")
+        i = 0
+        while i < len(nn_labels):
+            j = i+1
+            while j < len(nn_labels):
+                a_label = nn_labels[i]
+                b_label = nn_labels[j]
+                a_attr = nn_attributions[i]
+                b_attr = nn_attributions[j]
 
-            w, p = wilcoxon(footrules)
-            if p >= 0.01:
-                print("Not significant", a_label, b_label, w, p)
+                a = distance_fn(a_attr, gt_attributions)
+                b = distance_fn(b_attr, gt_attributions)
+                footrules = a - b
 
-            j += 1
-        i += 1
+                w, p = wilcoxon(footrules)
+                if p >= 0.01:
+                    print("Not significant", a_label, b_label, w, p)
+
+                j += 1
+            i += 1
+        
+        print("-"*50)
 
