@@ -11,9 +11,11 @@ In case of questions and / or problems with the code, feel free to open an issue
     - `feature_names.txt` contains all feature names in the same order as in the Numpy arrays
 - You can find the code that trains the Neural Network in `code/train_model.py`, the model architecture in `code/model.py` and the training configuration in `code/parameters.py`
 - `code/exp1.py` evaluates the trained models on the test dataset
-- `code/exp2.py` compares different explainability methods on both models and plots the results (Figure 2 in the paper)
-- `code/exp3.py` outlines the debugging use case and plots the results (Figure 3 in the paper)
+- `code/exp2.py` compares different explainability methods on both models and plots the results (Figure 5 in the paper)
+- `code/exp3.py` outlines the debugging use case and plots the results (Figure 7 in the paper)
 - `code/exp4.py` calculates the significance values for `code/exp2.py` using a Wilcoxon test
+- `code/exp5.py` calculates the correlations between the explanations and creates the plot in Figure 6.
+- `code/dataset_viz.py` contains the code to generate the plots analyzing the dataset and expert annotations.
 
 # Requirements
 To recreate the experiments, first, install the dependencies using `python` version 3.8 or newer:
