@@ -1,5 +1,5 @@
 # SancScreen
-This code is accompanying our submission to the XAI Debugging Workshop at NeurIPS 2021
+This code is accompanying our submission to DSAA22
 Below, you will find instructions for installing the dependencies, as well as a description of each important source file to recreate our experiments.
 In case of questions and / or problems with the code, feel free to open an issue on this repository.
 
